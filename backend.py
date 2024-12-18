@@ -1,63 +1,39 @@
-from qdrant_client import QdrantClient, models
-import openai
+# backend.py
+from fastapi import FastAPI, HTTPException, UploadFile
+from app.openai_client import OpenAIClient
+from app.pdf_handler import PDFHandler
+from app.qdrant_client_wrapper import QdrantClientWrapper
 
-from qdrant_client.http.models import CollectionDescription
 
-class QdrantClientWrapper:
-    def __init__(self):
-        self.client = QdrantClient(
-            url="https://931bba9e-744e-4123-8d98-9d68d0b64a55.us-west-2-0.aws.cloud.qdrant.io:6333",
-            api_key="xhdRxCUTBZ-RC286QU_R_nkfVziAhOTIQsyzqNEEZElKRtGJTVuZpA"
-        )
-        self._initialize_collection()
+app = FastAPI()
 
-    def _initialize_collection(self):
-        collection_name = "citychat_documents"
-        try:
-            #Checks to see if the collection exists
-            collections = self.client.get_collections()
-            if any(coll.name == collection_name for coll in collections.collections):
-                print(f"Collection '{collection_name}' already exists.")
-            else:
-                self.client.create_collection(
-                    collection_name=collection_name,
-                    vector_size=1536,
-                    distance="Cosine"
-                )
-                print(f"Collection '{collection_name}' created successfully.")
-        except Exception as e:
-            print(f"Error initializing collection: {e}") #Error catching 
+# Initialize clients
+qdrant_client = QdrantClientWrapper()
+openai_client = OpenAIClient()
+pdf_handler = PDFHandler()
 
-    def upload_text(self, text: str):
-        chunks = text.split(". ")  # Split text into sentences
-        points = []
-        for i, chunk in enumerate(chunks):
-            vector = self._vectorize_text(chunk)
-            points.append(models.PointStruct(
-                id=i,
-                payload={"text": chunk},
-                vector=vector
-            ))
-        self.client.upsert(
-            collection_name=self.collection_name,
-            points=points
-        )
+@app.post("/upload_pdf/")
+async def upload_pdf(file: UploadFile):
+    file_location = f"./Karun_Jonathan_resume.pdf"
+    with open(file_location, "wb") as f:
+        f.write(await file.read())
+    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    #Upload pdf endpoint
+    try:
+        content = await file.read()
+        text = pdf_handler.extract_text(content)
+        qdrant_client.upload_text(text)
+        return {"message": "PDF uploaded and processed successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    def query(self, query_text: str) -> str:
-        query_vector = self._vectorize_text(query_text)
-        results = self.client.search(
-            collection_name=self.collection_name,
-            query_vector=query_vector,
-            limit=5
-        )
-        return "\n".join(hit.payload["text"] for hit in results)
-    
-    def _vectorize_text(self, text: str) -> list:
-        try:
-            response = openai.Embedding.create(
-                model="text-embedding-ada-002",
-                input=text
-            )
-            return response['data'][0]['embedding']
-        except Exception as e:
-            raise ValueError(f"Failed to vectorize text: {e}")
+@app.post("/ask_question/")
+async def ask_question(question: str):
+    #Ask question endpoint
+    try:
+        context = qdrant_client.query(question)
+        answer = openai_client.generate_answer(question, context)
+        return {"answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
