@@ -6,8 +6,8 @@ from qdrant_client.http.models import CollectionDescription
 class QdrantClientWrapper:
     def __init__(self):
         self.client = QdrantClient(
-            url="https://931bba9e-744e-4123-8d98-9d68d0b64a55.us-west-2-0.aws.cloud.qdrant.io:6333",
-            api_key="xhdRxCUTBZ-RC286QU_R_nkfVziAhOTIQsyzqNEEZElKRtGJTVuZpA"
+            url="My_Qdrant_Endpoint",
+            api_key="My_Qdrant_API_Key"
         )
         self._initialize_collection()
 
