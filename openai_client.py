@@ -1,8 +1,14 @@
+
+import os
 import openai
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class OpenAIClient:
     def __init__(self):
-        openai.api_key = "My_OpenAI_key"
+        # Set your OpenAI API key here
+        openai.api_key = "OPENAI-KEY"
 
     def generate_answer(self, question: str, context: str) -> str:
         response = openai.Completion.create(
