@@ -1,5 +1,3 @@
-# app/backend.py
-
 #source venv/bin/activate
 #python main.py
 
@@ -11,7 +9,7 @@ from app.qdrant_client_wrapper import QdrantClientWrapper
 
 app = FastAPI()
 
-# Initialize clients
+# Initialize clients needed for the program!
 qdrant_client = QdrantClientWrapper()
 openai_client = OpenAIClient()
 pdf_handler = PDFHandler()
@@ -19,10 +17,9 @@ pdf_handler = PDFHandler()
 
 @app.post("/upload_pdf/")
 async def upload_pdf(file: UploadFile = None):
-    # Specify the file path directly here
+    # Specify the file path directly here -> 
     file_location = "/Users/jonathankarun/CITYSIMPLIFY/city_simplify_code/Test_Doc.pdf"
     try:
-        # Check if the file exists at the specified path
         with open(file_location, "rb") as f:
             print(f.read(500))  # Read and print the first 500 bytes to verify the file content
 
