@@ -1,6 +1,7 @@
 #source venv/bin/activate
 #python main.py
 
+#imports
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, UploadFile
 from app.openai_client import OpenAIClient
