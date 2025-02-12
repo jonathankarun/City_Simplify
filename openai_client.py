@@ -7,7 +7,7 @@ load_dotenv()
 
 class OpenAIClient:
     def __init__(self):
-        # Set your OpenAI API key here
+        # Set OPENai key
         openai.api_key = "OPENAI-KEY"
 
     #Generate answer function
