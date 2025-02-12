@@ -1,4 +1,4 @@
-# app/qdrant_client_wrapper.py
+# Imports
 import os
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import CollectionDescription
