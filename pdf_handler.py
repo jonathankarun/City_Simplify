@@ -1,3 +1,4 @@
+#imports
 import io
 from PyPDF2 import PdfReader
 
@@ -6,7 +7,8 @@ class PDFHandler:
         try:
             
             file_like_object = io.BytesIO(file)
-        
+            
+            #Checks the first 500 bytes of the pdf to ensure everything is working alright
             file_like_object.seek(0)
             print(f"First 500 bytes of PDF: {file_like_object.read(500)}")
 
